@@ -92,9 +92,32 @@ describe("votingdapp", () => {
       smoothCandidateAddress
     );
     poll = await votingProgram.account.poll.fetch(pollAddress);
-    
+
     expect(smoothCandidate.candidateName).toEqual("smooth");
     expect(smoothCandidate.candidateVotes.toNumber()).toEqual(0);
     expect(poll.candidateParticipated.toNumber()).toEqual(2);
+  });
+
+  it("Vote a candidate", async () => {
+    await votingProgram.methods
+      .initializePoll(
+        new anchor.BN(pollId),
+        "What is your favourite type of peanut butter",
+        new anchor.BN(1),
+        new anchor.BN(1)
+      )
+      .rpc();
+
+    await votingProgram.methods
+      .initializeCandidate(new anchor.BN(pollId), "smooth")
+      .rpc();
+
+    await votingProgram.methods.vote(new anchor.BN(pollId), "smooth").rpc();
+
+    const smoothCandidate = await votingProgram.account.candidate.fetch(
+      smoothCandidateAddress
+    );
+
+    expect(smoothCandidate.candidateVotes.toNumber()).toEqual(1);
   });
 });
